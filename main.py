@@ -30,4 +30,5 @@ def start(update, context):
 
 
 dispatcher.add_handler(CommandHandler("start", start))
+dispatcher.add_handler(CommandHandler("prices", start))
 updater.start_polling()
