@@ -33,6 +33,10 @@ def get_message(is_telegram):
     message = ""
     crypto_data = get_prices()
     emoji = "➡️"
+    tvl_url = "https://analytics.parallel.fi/api/amm/tvl"
+    req = requests.get(url=tvl_url)
+    tvl_data = req.json()
+
     for i in crypto_data:
         coin = crypto_data[i]["coin"]
         price = crypto_data[i]["price"]
@@ -51,5 +55,6 @@ def get_message(is_telegram):
                        f"**Price:** ${price:,.2f}\n" \
                        f"**Day Change:** {emoji} {change_day:.2f}%\n\n"
 
+    message += f"*TVL*: ${tvl_data['val']:,.2f}\n\n"
     message += f"_Last updated:_ _{current_time}_ _UTC_\n"
     return message
