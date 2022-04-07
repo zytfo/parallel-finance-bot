@@ -54,12 +54,12 @@ def get_message():
         previous_day_price = crypto_data[i]["previous_price"]
         change_day = (price - previous_day_price) / previous_day_price * 100
         if change_day > 0:
-            emoji = "🚀"
+            emoji = "🟩"
         elif change_day < 0:
-            emoji = "🔻️"
+            emoji = "🟥"
         message += f"*Coin:* {coin}\n" \
                    f"*Price:* ${price:,.2f}\n" \
-                   f"*Day Change:* {emoji}{change_day:.2f}%\n\n"
+                   f"*Day Change:* {emoji} {change_day:.2f}%\n\n"
 
     message += f"_Last updated:_ _{current_time}_ _UTC_\n"
     return message
