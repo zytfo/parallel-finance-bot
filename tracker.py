@@ -24,7 +24,3 @@ def get_prices():
         pass
 
     return data
-
-
-if __name__ == "__main__":
-    print(get_prices())

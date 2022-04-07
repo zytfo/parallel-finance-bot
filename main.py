@@ -1,16 +1,50 @@
-from telegram.ext import Updater
-from telegram.ext import CommandHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.error import BadRequest
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    CallbackQueryHandler,
+    ConversationHandler,
+    CallbackContext,
+)
 from tracker import get_prices
+from datetime import datetime
 import config
 
-telegram_bot_token = config.BOT_TOKEN
 
-updater = Updater(token=telegram_bot_token, use_context=True)
-dispatcher = updater.dispatcher
+FIRST = range(1)
 
 
-def start(update, context):
-    chat_id = update.effective_chat.id
+def start(update: Update, context: CallbackContext) -> None:
+    keyboard = [
+        [
+            InlineKeyboardButton("🔄 Update", callback_data=str(FIRST)),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(text=get_message(), parse_mode="Markdown", reply_markup=reply_markup)
+
+
+def refresh(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    query.answer()
+    keyboard = [
+        [
+            InlineKeyboardButton("🔄 Update", callback_data=str(FIRST)),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    try:
+        query.edit_message_text(
+            text=get_message(), parse_mode="Markdown", reply_markup=reply_markup
+        )
+    except BadRequest:
+        pass
+
+
+def get_message():
+    utc_time = datetime.utcnow()
+    current_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
     message = ""
     crypto_data = get_prices()
     emoji = "➡️"
@@ -26,9 +60,19 @@ def start(update, context):
         message += f"*Coin:* {coin}\n" \
                    f"*Price:* ${price:,.2f}\n" \
                    f"*Day Change:* {emoji}{change_day:.2f}%\n\n"
-    context.bot.send_message(chat_id=chat_id, text=message, parse_mode="Markdown")
+
+    message += f"_Last updated:_ _{current_time}_ _UTC_\n"
+    return message
 
 
-dispatcher.add_handler(CommandHandler("start", start))
-dispatcher.add_handler(CommandHandler("prices", start))
-updater.start_polling()
+def main() -> None:
+    updater = Updater(token=config.BOT_TOKEN)
+    updater.dispatcher.add_handler(CommandHandler('start', start))
+    updater.dispatcher.add_handler(CommandHandler('update', start))
+    updater.dispatcher.add_handler(CallbackQueryHandler(refresh))
+    updater.start_polling()
+    updater.idle()
+
+
+if __name__ == '__main__':
+    main()
