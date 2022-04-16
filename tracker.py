@@ -5,8 +5,8 @@ from datetime import datetime
 
 
 def get_prices():
-    hko_page = 'https://analytics.parallel.fi/kusama/amm/HKO'
-    page_text = requests.get(hko_page).text
+    assets_page = 'https://analytics.parallel.fi/api/assets/prices/'
+    page_text = requests.get(assets_page).text
     expr = 'window.pricingData = (.*);</script><div id="root"></div><script src="/bundle.js"'
     result = re.search(expr, page_text)
     pricing_data = json.loads(result.group(1))
@@ -14,16 +14,15 @@ def get_prices():
     data = {}
     coins = list(pricing_data.keys())
 
-    try:
-        for coin in coins:
+    for coin in coins:
+        try:
             data[coin] = {
                 "coin": coin,
                 "price": pricing_data[coin][-1]['close'],
                 "previous_price": pricing_data[coin][-2]['close']
             }
-    except IndexError:
-        pass
-
+        except IndexError:
+            continue
     return data
 
 
@@ -48,11 +47,11 @@ def get_message(is_telegram):
             emoji = "🟥"
         if is_telegram:
             message += f"*Coin:* {coin}\n" \
-                       f"*Price:* ${price:,.2f}\n" \
+                       f"*Price:* ${price:,.3f}\n" \
                        f"*Day Change:* {emoji} {change_day:.2f}%\n\n"
         else:
             message += f"**Coin:** {coin}\n" \
-                       f"**Price:** ${price:,.2f}\n" \
+                       f"**Price:** ${price:,.3f}\n" \
                        f"**Day Change:** {emoji} {change_day:.2f}%\n\n"
 
     message += f"*TVL*: ${tvl_data['val']:,.2f}\n\n"
