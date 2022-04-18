@@ -54,6 +54,6 @@ def get_message(is_telegram):
                        f"**Price:** ${price:,.3f}\n" \
                        f"**Day Change:** {emoji} {change_day:.2f}%\n\n"
 
-    message += f"*TVL*: ${tvl_data['val']:,.2f}\n\n"
+    # message += f"*TVL*: ${tvl_data['val']:,.2f}\n\n"
     message += f"_Last updated:_ _{current_time}_ _UTC_\n"
     return message
